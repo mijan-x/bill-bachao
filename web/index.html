@@ -258,6 +258,9 @@ $('pkBtn').onclick = () => {
    <div class="why">ΔE = AC kW × hours × duty (0.6–0.9) × saving per °C (3–6%) × degrees raised. In the full app, 8 PM and 10 PM meter photos verify the saving.</div>`;
 };
 $('pkBtn').click();
+$('sgBtn').click();
+// open a tab from the URL, e.g. index.html#slab
+const h = location.hash.slice(1); const tb = document.querySelector(`#tabs button[data-t="${h}"]`); if (tb) tb.click();
 </script>
 </body>
 </html>
