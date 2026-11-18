@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bill Bachao · বিল বাঁচাও — prototype</title>
+<meta name="description" content="Bill Bachao: lower electricity bills for Bangladeshi families and a lower evening grid peak, from a phone photo of the meter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#12302c; --muted:#5b6f6b; --bg:#f4f8f6; --card:#ffffff; --line:#dbe6e2; --teal:#0f766e; --teal2:#14b8a6; --warn:#b45309; --warnbg:#fff7ed; --good:#15803d; --goodbg:#f0fdf4; --sim:#6d28d9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Hind Siliguri','Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  header { background:var(--teal); color:#fff; padding:20px 16px 14px; }
+  header h1 { margin:0; font-size:1.5rem; } header p { margin:4px 0 0; opacity:.9; font-size:.95rem; }
+  nav { display:flex; gap:6px; overflow-x:auto; padding:10px 12px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  nav button { flex:0 0 auto; border:1px solid var(--line); background:#fff; border-radius:999px; padding:8px 14px; font:inherit; font-size:.92rem; cursor:pointer; color:var(--ink); }
+  nav button.on { background:var(--teal); color:#fff; border-color:var(--teal); }
+  main { max-width:880px; margin:0 auto; padding:16px; }
+  section { display:none; } section.on { display:block; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+  .card h2 { margin:0 0 6px; font-size:1.15rem; } .card h3 { margin:12px 0 6px; font-size:1rem; }
+  .muted { color:var(--muted); font-size:.9rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+  .stat { background:var(--bg); border-radius:10px; padding:10px 12px; } .stat b { display:block; font-size:1.35rem; font-family:'Inter',sans-serif; } .stat span { font-size:.85rem; color:var(--muted); }
+  .alert { border-radius:10px; padding:12px 14px; margin:10px 0; } .alert.warn { background:var(--warnbg); border:1px solid #fed7aa; } .alert.good { background:var(--goodbg); border:1px solid #bbf7d0; }
+  .sim { display:inline-block; background:#ede9fe; color:var(--sim); border-radius:6px; padding:1px 8px; font-size:.78rem; font-weight:600; font-family:'Inter',sans-serif; vertical-align:middle; }
+  label { display:block; font-size:.9rem; margin:8px 0 4px; } input, select { width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; font:inherit; background:#fff; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; } .row > div { flex:1 1 140px; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; } th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); } th { color:var(--muted); font-weight:600; }
+  button.main { background:var(--teal); color:#fff; border:0; border-radius:10px; padding:11px 16px; font:inherit; font-weight:600; cursor:pointer; margin-top:10px; }
+  button.ghost { background:#fff; color:var(--teal); border:1px solid var(--teal); border-radius:10px; padding:7px 12px; font:inherit; cursor:pointer; }
+  .why { font-size:.85rem; color:var(--muted); background:var(--bg); border-radius:8px; padding:8px 10px; margin-top:8px; }
+  svg text { font-family:'Inter',sans-serif; font-size:11px; fill:var(--muted); }
+  footer { text-align:center; color:var(--muted); font-size:.82rem; padding:20px 12px 40px; }
+  a { color:var(--teal); }
+</style>
+</head>
+<body>
+<header>
+  <h1>বিল বাঁচাও · Bill Bachao</h1>
+  <p>Save your bill, save the grid — one photo at a time. <span class="sim" style="background:#ffffff33;color:#fff">Prototype</span></p>
+</header>
+<nav id="tabs">
+  <button data-t="dash" class="on">ড্যাশবোর্ড · Dashboard</button>
+  <button data-t="slab">স্ল্যাব গার্ড · Slab Guard</button>
+  <button data-t="twin">হোম টুইন · Home twin</button>
+  <button data-t="tariff">বিল হিসাব · Tariff</button>
+  <button data-t="peak">পিক আওয়ার হিরো · Peak Hour Hero</button>
+  <button data-t="about">About</button>
+</nav>
+<main>
+
+<section id="dash" class="on">
+  <div class="card">
+    <h2>রিনা আক্তার, মিরপুর (DESCO prepaid) <span class="sim">Simulated household</span></h2>
+    <p class="muted">Demo data only: 60 simulated days (Aug–Sep 2026). No real person's data is used in this public demo.</p>
+    <div class="grid" id="dashStats"></div>
+    <div id="dashAlert"></div>
+  </div>
+  <div class="card">
+    <h2>How much of the bill is cooling? · বিলের কতটা ঠান্ডা রাখতে খরচ?</h2>
+    <p class="muted">Each dot is one day: daily kWh against mean temperature. The line is this home's twin: kWh = b + c × max(0, T − 24°C).</p>
+    <div id="chart"></div>
+    <div class="why" id="twinWhy"></div>
+  </div>
+</section>
+
+<section id="slab">
+  <div class="card">
+    <h2>Slab Guard · স্ল্যাব গার্ড</h2>
+    <p class="muted">Enter this month's meter reading so far. Bill Bachao projects month-end units and warns before you cross into a costlier slab.</p>
+    <div class="row">
+      <div><label>Units used so far this month</label><input id="sgUnits" type="number" value="350" min="0"></div>
+      <div><label>Today's date (day of month)</label><input id="sgDay" type="number" value="22" min="1" max="31"></div>
+      <div><label>Days in month</label><input id="sgDim" type="number" value="31" min="28" max="31"></div>
+    </div>
+    <div class="row">
+      <div><label>Average daily use from now (kWh)</label><input id="sgDaily" type="number" value="15" step="0.1"></div>
+      <div><label>Share of daily use that is cooling (%)</label><input id="sgCool" type="number" value="55" min="0" max="100"></div>
+    </div>
+    <button class="main" id="sgBtn">Check my month · মাস যাচাই করুন</button>
+    <div id="sgOut"></div>
+  </div>
+</section>
+
+<section id="twin">
+  <div class="card">
+    <h2>Home twin from nameplates · নেমপ্লেট থেকে হোম টুইন</h2>
+    <p class="muted">In the full app the user photographs each appliance's nameplate and the AI reads the watts. Here you can type them.</p>
+    <table id="appTable"><thead><tr><th>Appliance</th><th>Watts</th><th>Qty</th><th>Hours/day</th><th></th></tr></thead><tbody></tbody></table>
+    <button class="ghost" id="addApp" style="margin-top:8px">+ Add appliance</button>
+    <div id="twinOut"></div>
+  </div>
+</section>
+
+<section id="tariff">
+  <div class="card">
+    <h2>Bill calculator · বিল হিসাব</h2>
+    <p class="muted">BERC residential (LT-A) tariff from the June 2026 billing cycle. Progressive blocks; lifeline rate only when total use ≤ 50 units; 5% VAT. Check the demand charge on your own bill.</p>
+    <div class="row">
+      <div><label>Units this month</label><input id="tfUnits" type="number" value="412" min="0"></div>
+      <div><label>Sanctioned load (kW)</label><input id="tfKw" type="number" value="0" min="0" step="0.5"></div>
+      <div><label>Demand charge (Tk per kW)</label><input id="tfDr" type="number" value="0" min="0"></div>
+    </div>
+    <button class="main" id="tfBtn">Calculate · হিসাব করুন</button>
+    <div id="tfOut"></div>
+  </div>
+</section>
+
+<section id="peak">
+  <div class="card">
+    <h2>Peak Hour Hero · পিক আওয়ার হিরো <span class="sim">Preview for the final</span></h2>
+    <p class="muted">On hot evenings, households get a voluntary challenge for the 8–10 PM peak. The safety rules run first. Savings are shown as a range and verified later with before/after meter photos.</p>
+    <div class="row">
+      <div><label>AC power (kW)</label><input id="pkKw" type="number" value="1.5" step="0.1"></div>
+      <div><label>Challenge hours</label><input id="pkH" type="number" value="2" step="0.5"></div>
+      <div><label>Raise AC by (°C)</label><input id="pkDeg" type="number" value="2" min="1" max="4"></div>
+      <div><label>Heat index tonight (°C)</label><input id="pkHi" type="number" value="38"></div>
+    </div>
+    <label><input id="pkVul" type="checkbox" checked style="width:auto"> Elderly, infant, pregnant or ill member at home</label>
+    <label><input id="pkLife" type="checkbox" style="width:auto"> Lifeline household (≤ 50 units/month)</label>
+    <button class="main" id="pkBtn">Plan tonight's challenge</button>
+    <div id="pkOut"></div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="card">
+    <h2>About this prototype</h2>
+    <p>Bill Bachao — ClimateSphere AI → <b>Energy Brain</b> · International AI Builders Congress 2026 · Team JU_Segfault (Jahangirnagar University).</p>
+    <h3>Real vs simulated</h3>
+    <table>
+      <tr><th>Part</th><th>Status</th></tr>
+      <tr><td>Tariff calculator (BERC June 2026)</td><td>Real, unit-tested (same tests in Python and JS)</td></tr>
+      <tr><td>Home twin maths and Slab Guard</td><td>Real, unit-tested</td></tr>
+      <tr><td>Heat-safety rules</td><td>Real, unit-tested</td></tr>
+      <tr><td>Meter-photo OCR (Gemini vision API)</td><td>Built in the API (repo); not in this static demo</td></tr>
+      <tr><td>Bill redaction on local Ollama</td><td>Built in the repo; runs on the team laptop</td></tr>
+      <tr><td>MCP server (bill-bachao-mcp)</td><td>Built; stdio + Streamable HTTP</td></tr>
+      <tr><td>Demo household "Rina", neighbourhood MW</td><td><span class="sim">Simulated</span></td></tr>
+      <tr><td>Peak Hour Hero verification, coach, RAG</td><td>In progress for the final</td></tr>
+    </table>
+    <h3>Code</h3>
+    <p>Source: <a id="repoLink" href="https://github.com/mijan-x/bill-bachao">github.com/mijan-x/bill-bachao</a></p>
+    <p class="muted">Starter code drafted with an AI assistant (Claude); reviewed and tested by the team.</p>
+  </div>
+</section>
+</main>
+<footer>Bill Bachao prototype · Numbers come from tested code, not from an AI guess · Tariff source: BERC order, June 2026</footer>
+
+<script src="logic.js"></script>
+<script src="demo-data.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const tk = x => '৳' + Math.round(x).toLocaleString('en-IN');
+const f1 = x => (Math.round(x * 10) / 10).toLocaleString('en-IN');
+
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+  window.scrollTo(0, 0);
+});
+
+/* ---------- Dashboard (simulated household) ---------- */
+(function dashboard() {
+  const days = window.DEMO_DAYS, fit = BB.fitTwin(days.map(d => d.k), days.map(d => d.t));
+  const aug = days.filter(d => d.d.startsWith('2026-08')), sofar = aug.slice(0, 22), rest = aug.slice(22);
+  const unitsSoFar = sofar.reduce((s, d) => s + d.k, 0);
+  const projected = unitsSoFar + rest.reduce((s, d) => s + fit.b + fit.c * BB.cdd(d.t), 0);
+  const avgT = aug.reduce((s, d) => s + d.t, 0) / aug.length, coolDay = fit.c * BB.cdd(avgT), share = coolDay / (fit.b + coolDay);
+  const bill = BB.tariff(projected);
+  $('dashStats').innerHTML = `
+    <div class="stat"><b>${f1(unitsSoFar)}</b><span>units used, 1–22 Aug</span></div>
+    <div class="stat"><b>${f1(projected)}</b><span>projected units by 31 Aug</span></div>
+    <div class="stat"><b>${tk(bill.total)}</b><span>projected August bill (incl. VAT)</span></div>
+    <div class="stat"><b>${Math.round(share * 100)}%</b><span>of daily use is cooling</span></div>`;
+  const over = projected - 400;
+  $('dashAlert').innerHTML = over > 0
+    ? `<div class="alert warn"><b>Slab Guard:</b> at this pace Rina passes 400 units this month. Units above 400 cost ৳15.01 instead of ৳9.62, so the last ${f1(over)} units add about ${tk(over * (15.01 - 9.62) * 1.05)} extra. Raising the AC from 24°C to 26°C for the rest of the month saves about ${f1(coolDay * 0.06 * 2 * rest.length * 0.5)}–${f1(coolDay * 0.06 * 2 * rest.length)} kWh.</div>`
+    : `<div class="alert good">On track to stay under 400 units this month.</div>`;
+  $('twinWhy').innerHTML = `Twin fitted on ${fit.n} days: base load b = ${f1(fit.b)} kWh/day, cooling c = ${f1(fit.c)} kWh per °C above 24°C, r² = ${fit.r2.toFixed(2)}. Every number on this page is calculated from these values, not generated by an AI.`;
+  // chart
+  const W = 640, H = 260, L = 44, B = 34, T = 14, R = 14;
+  const tMin = Math.floor(Math.min(...days.map(d => d.t))) - 1, tMax = Math.ceil(Math.max(...days.map(d => d.t))) + 1;
+  const kMax = Math.ceil(Math.max(...days.map(d => d.k)) / 5) * 5;
+  const X = t => L + (t - tMin) / (tMax - tMin) * (W - L - R), Y = k => H - B - k / kMax * (H - B - T);
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Daily electricity use rises with temperature">`;
+  for (let k = 0; k <= kMax; k += 5) s += `<line x1="${L}" x2="${W - R}" y1="${Y(k)}" y2="${Y(k)}" stroke="#e5ece9"/><text x="${L - 6}" y="${Y(k) + 4}" text-anchor="end">${k}</text>`;
+  for (let t = tMin; t <= tMax; t += 2) s += `<text x="${X(t)}" y="${H - B + 16}" text-anchor="middle">${t}°C</text>`;
+  s += `<text x="${L}" y="${T - 2}">kWh/day</text><text x="${W - R}" y="${H - 4}" text-anchor="end">daily mean temperature</text>`;
+  days.forEach(d => s += `<circle cx="${X(d.t)}" cy="${Y(d.k)}" r="3.5" fill="#14b8a6" fill-opacity="0.55"/>`);
+  const pts = []; for (let t = tMin; t <= tMax; t += 0.25) pts.push(`${X(t)},${Y(fit.b + fit.c * BB.cdd(t))}`);
+  s += `<polyline points="${pts.join(' ')}" fill="none" stroke="#0f766e" stroke-width="2.5"/></svg>`;
+  $('chart').innerHTML = s;
+})();
+
+/* ---------- Slab Guard ---------- */
+$('sgBtn').onclick = () => {
+  const u = +$('sgUnits').value, day = +$('sgDay').value, dim = +$('sgDim').value, daily = +$('sgDaily').value, cool = +$('sgCool').value / 100;
+  const left = Math.max(0, dim - day), proj = u + daily * left, edges = [50, 75, 200, 300, 400, 600];
+  const next = edges.find(e => e >= u && proj > e);
+  let html = `<div class="grid" style="margin-top:12px"><div class="stat"><b>${f1(proj)}</b><span>projected month-end units</span></div><div class="stat"><b>${tk(BB.tariff(proj).total)}</b><span>projected bill</span></div><div class="stat"><b>৳${BB.marginalRate(u)}</b><span>price of your next unit</span></div></div>`;
+  if (next !== undefined) {
+    const crossDay = day + Math.ceil((next - u) / Math.max(daily, 0.01));
+    const need = proj - next, perDegree = daily * cool * 0.045 * left; // mid of 3–6% per °C
+    const degrees = perDegree > 0 ? Math.ceil(need / perDegree) : Infinity;
+    const extra = BB.tariff(proj).total - BB.tariff(next).total;
+    html += `<div class="alert warn"><b>Warning:</b> you will pass ${next} units around day ${Math.min(crossDay, dim)}. The ${f1(need)} units above ${next} will cost about ${tk(extra)} (incl. VAT). ` +
+      (degrees <= 3 ? `Raising the AC by <b>${degrees}°C</b> for the rest of the month should keep you under.` : `Raising the AC by 2°C saves about ${f1(perDegree * 2)} units — not enough to stay under, but it cuts the extra cost by about ${tk(perDegree * 2 * BB.marginalRate(next + 1) * 1.05)}.`) +
+      `</div><div class="why">Why: projection = units so far + daily use × days left. AC saving assumed 3–6% of cooling energy per °C (mid-point 4.5% used here).</div>`;
+  } else html += `<div class="alert good">You stay in your current slab this month. Keep going!</div>`;
+  $('sgOut').innerHTML = html;
+};
+
+/* ---------- Home twin ---------- */
+let apps = [{ n: 'AC 1.5 ton (non-inverter)', w: 1500, q: 1, h: 6 }, { n: 'Ceiling fan', w: 75, q: 4, h: 12 }, { n: 'Fridge', w: 150, q: 1, h: 10 }, { n: 'LED lights', w: 12, q: 8, h: 6 }, { n: 'TV', w: 90, q: 1, h: 4 }];
+function drawApps() {
+  $('appTable').querySelector('tbody').innerHTML = apps.map((a, i) => `<tr>
+    <td><input value="${a.n}" data-i="${i}" data-k="n"></td><td><input type="number" value="${a.w}" data-i="${i}" data-k="w"></td>
+    <td><input type="number" value="${a.q}" data-i="${i}" data-k="q"></td><td><input type="number" value="${a.h}" step="0.5" data-i="${i}" data-k="h"></td>
+    <td><button class="ghost" data-del="${i}">×</button></td></tr>`).join('');
+  $('appTable').querySelectorAll('input').forEach(inp => inp.oninput = () => { const a = apps[+inp.dataset.i]; a[inp.dataset.k] = inp.dataset.k === 'n' ? inp.value : +inp.value; twinCalc(); });
+  $('appTable').querySelectorAll('[data-del]').forEach(b => b.onclick = () => { apps.splice(+b.dataset.del, 1); drawApps(); });
+  twinCalc();
+}
+function twinCalc() {
+  const kwh = BB.nameplate(apps.map(a => ({ watts: a.w, qty: a.q, hours: a.h }))), month = kwh * 30, bill = BB.tariff(month);
+  const rows = apps.map(a => ({ n: a.n, k: a.w * a.q * a.h / 1000 })).sort((x, y) => y.k - x.k);
+  $('twinOut').innerHTML = `<div class="grid" style="margin-top:12px"><div class="stat"><b>${f1(kwh)}</b><span>kWh per day</span></div><div class="stat"><b>${f1(month)}</b><span>units per month</span></div><div class="stat"><b>${tk(bill.total)}</b><span>monthly bill estimate</span></div></div>
+   <h3>Biggest users</h3><table>${rows.map(r => `<tr><td>${r.n}</td><td>${f1(r.k)} kWh/day</td><td>${Math.round(r.k / kwh * 100)}%</td></tr>`).join('')}</table>
+   <div class="why">Method: watts × quantity × hours ÷ 1000. Once 7+ meter readings exist, the twin switches to the temperature regression shown on the dashboard.</div>`;
+}
+$('addApp').onclick = () => { apps.push({ n: 'New appliance', w: 100, q: 1, h: 2 }); drawApps(); };
+drawApps();
+
+/* ---------- Tariff ---------- */
+$('tfBtn').onclick = () => {
+  const r = BB.tariff(+$('tfUnits').value, +$('tfKw').value, +$('tfDr').value);
+  $('tfOut').innerHTML = `<table style="margin-top:12px"><tr><th>Block (units)</th><th>Units</th><th>Rate</th><th>Tk</th></tr>${r.blocks.map(b => `<tr><td>${b.from}–${b.to === Infinity ? '…' : f1(b.to)}</td><td>${f1(b.units)}</td><td>৳${b.rate}</td><td>${b.tk.toLocaleString('en-IN')}</td></tr>`).join('')}
+   <tr><td colspan="3">Energy charge</td><td>${r.energy.toLocaleString('en-IN')}</td></tr><tr><td colspan="3">Demand charge</td><td>${r.demand.toLocaleString('en-IN')}</td></tr><tr><td colspan="3">VAT 5%</td><td>${r.vat.toLocaleString('en-IN')}</td></tr><tr><th colspan="3">Total</th><th>${r.total.toLocaleString('en-IN')}</th></tr></table>
+   <div class="why">Next unit costs ৳${BB.marginalRate(r.units)}. ${r.toNext !== null ? f1(r.toNext) + ' units until the next slab.' : 'You are in the top slab.'}</div>`;
+};
+$('tfBtn').click();
+
+/* ---------- Peak Hour Hero ---------- */
+$('pkBtn').onclick = () => {
+  const vul = $('pkVul').checked, life = $('pkLife').checked, hi = +$('pkHi').value;
+  const safe = BB.safeSetpoint(vul, hi, life);
+  if (!safe.allowed) {
+    $('pkOut').innerHTML = `<div class="alert good"><b>No challenge tonight.</b> ${safe.reason === 'heat' ? 'Heat index is above 41°C and someone vulnerable lives here: staying cool comes first. Drink water and keep fans on.' : 'Lifeline households only get saving tips, never challenges.'}</div><div class="why">Safety rule checked before any saving is planned.</div>`;
+    return;
+  }
+  const deg = Math.min(+$('pkDeg').value, safe.maxC - 24), [lo, hi2] = BB.acSaving(+$('pkKw').value, +$('pkH').value, deg);
+  const homes = 200, accept = 0.4, kwLo = homes * accept * lo / +$('pkH').value, kwHi = homes * accept * hi2 / +$('pkH').value;
+  $('pkOut').innerHTML = `<div class="alert warn"><b>আজকের চ্যালেঞ্জ (8–10 PM):</b> AC ${24 + deg}°C-এ রাখুন, পাম্প ও ইস্ত্রি রাত ১১টার পরে চালান। <br>Tonight 8–10 PM: set the AC to <b>${24 + deg}°C</b> (limit for this home: ${safe.maxC}°C), run the pump and iron after 11 PM.</div>
+   <div class="grid"><div class="stat"><b>${lo}–${hi2}</b><span>kWh saved by this home</span></div><div class="stat"><b>${f1(kwLo)}–${f1(kwHi)} kW</b><span>area total <span class="sim">Simulated</span> (200 homes, 40% join)</span></div></div>
+   <div class="why">ΔE = AC kW × hours × duty (0.6–0.9) × saving per °C (3–6%) × degrees raised. In the full app, 8 PM and 10 PM meter photos verify the saving.</div>`;
+};
+$('pkBtn').click();
+</script>
+</body>
+</html>

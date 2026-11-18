@@ -1,0 +1,26 @@
+# Bill Bachao — architecture
+
+```mermaid
+flowchart TD
+  App[Household app<br/>Bangla-first web] --> API[FastAPI backend<br/>/ocr /tariff /twin /slab /coach /peak]
+  Dash[Admin + partner dashboard<br/>area totals only] --> API
+  API --> DB[(Supabase<br/>Postgres + pgvector + Auth + Storage)]
+  API --> LLM[Cloud LLM<br/>meter OCR, chat]
+  API --> Laptop[Team laptop via Cloudflare Tunnel<br/>Ollama redactor + n8n]
+  API --> Agents[LangGraph agents<br/>Peak Planner, Coach]
+  Agents --> MCP[bill-bachao-mcp<br/>read-only tools, stdio + HTTP]
+  MCP --> DB
+```
+
+**Rule:** the LLM reads and explains; plain, tested code calculates every taka and kWh.
+
+| Component | Status (preliminary) |
+|---|---|
+| Tariff calculator (BERC June 2026) | Built, tested (`api/tariff.py`, `web/logic.js`) |
+| Home twin + Slab Guard maths | Built, tested (`api/twin.py`) |
+| Meter OCR endpoint | Built (`api/main.py`, Gemini vision, strict JSON) |
+| Local bill redactor | Built (`local/redactor.py`, Tesseract + Ollama qwen2.5) |
+| MCP server | Built (`mcp/server.py`, stdio + Streamable HTTP at `/mcp`) |
+| Database schema + RLS | Built (`db/schema.sql`) |
+| Public demo | Built (`web/`, simulated household) |
+| Coach + RAG, Peak Hour Hero verification, n8n workflows | Planned for the final |

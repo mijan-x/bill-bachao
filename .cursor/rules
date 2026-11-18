@@ -1,0 +1,5 @@
+- Every number shown to a user comes from a tested function (api/tariff.py, api/twin.py, web/logic.js), never from free LLM text.
+- Never log or print personal data (names, addresses, phone, account or meter numbers).
+- UI text is Bangla-first with English alongside.
+- Every new feature gets a test in tests/ before it is merged.
+- Label simulated data "Simulated" everywhere it appears.
