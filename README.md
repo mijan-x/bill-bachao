@@ -13,7 +13,7 @@ ClimateSphere AI → Energy Brain · International AI Builders Congress 2026 · 
 | `api/main.py` | FastAPI: `/health`, `/tariff`, `/ocr/meter` (Gemini vision → strict JSON), `/twin/nameplate` | runs |
 | `local/redactor.py` | Runs on the team laptop: Tesseract + regex + Ollama qwen2.5 removes personal data from bill photos | needs Tesseract + Ollama |
 | `mcp/server.py` | `bill-bachao-mcp` (FastMCP): read-only tools over stdio or Streamable HTTP (`/mcp` on port 8001) | runs |
-| `db/schema.sql` | Supabase tables, row-level security, tariff seed, vector search function | run in SQL Editor |
+| `db/schema.sql` | Supabase tables, row-level security, tariff seed, vector search function | **deployed** (Supabase, Singapore) |
 | `scripts/seed_demo.py` | 60 days of SIMULATED readings for the public demo | runs |
 | `web/` | Public prototype: dashboard, Slab Guard, home twin, tariff, Peak Hour Hero preview | live on GitHub Pages |
 | `docs/` | Architecture, master prompt | |

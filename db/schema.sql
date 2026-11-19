@@ -1,5 +1,6 @@
--- Bill Bachao: preliminary schema. Run in Supabase -> SQL Editor.
-create extension if not exists vector;
+-- Bill Bachao schema. DEPLOYED to Supabase project "bill-bachao" (ap-southeast-1) on 19 Nov 2026
+-- as migration "bill_bachao_initial_schema". Re-run only on a fresh project (SQL Editor).
+create extension if not exists vector with schema extensions;
 
 create table if not exists households (
   id uuid primary key default gen_random_uuid(),
@@ -58,7 +59,7 @@ create table if not exists rag_chunks (
   id bigserial primary key,
   doc_title text, source_url text,
   context_prefix text, chunk_text text,
-  embedding vector(1024)           -- bge-m3
+  embedding extensions.vector(1024) -- bge-m3
 );
 
 create table if not exists token_usage (
@@ -82,6 +83,15 @@ create policy "own consents" on consents for all using (household_id in (select 
 create policy "own readings" on meter_readings for all using (household_id in (select id from households where owner_id = auth.uid()));
 create policy "own appliances" on appliances for all using (household_id in (select id from households where owner_id = auth.uid()));
 
+alter table weather_daily enable row level security;
+alter table tariff_slabs enable row level security;
+alter table rag_chunks enable row level security;
+alter table token_usage enable row level security;   -- backend (service role) only
+alter table audit_logs enable row level security;    -- backend (service role) only
+create policy "tariff readable" on tariff_slabs for select to anon, authenticated using (true);
+create policy "weather readable" on weather_daily for select to authenticated using (true);
+create policy "knowledge readable" on rag_chunks for select to authenticated using (true);
+
 -- Tariff seed (BERC, June 2026 billing cycle). Lifeline (<=50 units total) is handled in code at Tk 4.63.
 insert into tariff_slabs (from_unit, to_unit, rate_tk, effective_from, source_url) values
  (0, 75, 5.26, '2026-06-01', 'https://observerbd.com/news/578237'),
@@ -89,12 +99,12 @@ insert into tariff_slabs (from_unit, to_unit, rate_tk, effective_from, source_ur
  (201, 300, 9.10, '2026-06-01', 'https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens'),
  (301, 400, 9.62, '2026-06-01', 'https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens'),
  (401, 600, 15.01, '2026-06-01', 'https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens'),
- (601, null, 17.35, '2026-06-01', 'https://bdnews24.com/economy/9efadd3c57ad');
+ (601, null, 17.35, '2026-06-01', 'verify on a June 2026 DESCO/DPDC bill');
 
 -- Vector search helper for the coach
-create or replace function match_chunks(query_embedding vector(1024), match_count int default 5)
+create or replace function match_chunks(query_embedding extensions.vector(1024), match_count int default 5)
 returns table (id bigint, doc_title text, source_url text, chunk_text text, similarity float)
-language sql stable as $$
+language sql stable set search_path = public, extensions as $$
   select id, doc_title, source_url, chunk_text, 1 - (embedding <=> query_embedding) as similarity
   from rag_chunks order by embedding <=> query_embedding limit match_count;
 $$;
