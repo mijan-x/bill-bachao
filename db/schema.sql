@@ -59,8 +59,9 @@ create table if not exists rag_chunks (
   id bigserial primary key,
   doc_title text, source_url text,
   context_prefix text, chunk_text text,
-  embedding extensions.vector(1024) -- bge-m3
+  embedding extensions.vector(384) -- gte-small (built into Supabase Edge Functions)
 );
+-- More RAG columns, full-text index, knowledge graph and hybrid_search: supabase/migrations/20261119_rag_hybrid_graph.sql
 
 create table if not exists token_usage (
   id bigserial primary key, at timestamptz default now(),
@@ -101,10 +102,4 @@ insert into tariff_slabs (from_unit, to_unit, rate_tk, effective_from, source_ur
  (401, 600, 15.01, '2026-06-01', 'https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens'),
  (601, null, 17.35, '2026-06-01', 'verify on a June 2026 DESCO/DPDC bill');
 
--- Vector search helper for the coach
-create or replace function match_chunks(query_embedding extensions.vector(1024), match_count int default 5)
-returns table (id bigint, doc_title text, source_url text, chunk_text text, similarity float)
-language sql stable set search_path = public, extensions as $$
-  select id, doc_title, source_url, chunk_text, 1 - (embedding <=> query_embedding) as similarity
-  from rag_chunks order by embedding <=> query_embedding limit match_count;
-$$;
+-- Retrieval for the coach: see hybrid_search() in supabase/migrations/20261119_rag_hybrid_graph.sql

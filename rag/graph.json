@@ -1,0 +1,28 @@
+{
+"nodes": [
+ {"id":"ac","type":"Appliance","name":"Air conditioner","aliases":["ac","air conditioner","air conditioners","aircon","inverter","thermostat","এসি"]},
+ {"id":"fan","type":"Appliance","name":"Ceiling fan","aliases":["fan","fans","bldc","ফ্যান"]},
+ {"id":"pump","type":"Appliance","name":"Water pump / iron / washing","aliases":["pump","iron","washing","পাম্প"]},
+ {"id":"setpoint","type":"Tip","name":"Raise AC set-point","aliases":["25 c","26 c","27 c","degree","set-point","setpoint","temperature setting"]},
+ {"id":"shift","type":"Tip","name":"Shift load after 11 PM","aliases":["after 11","shift","shifting"]},
+ {"id":"slab400","type":"Slab","name":"400-unit slab edge","aliases":["400","slab","slabs","block","blocks","স্ল্যাব","৪০০"]},
+ {"id":"lifeline","type":"Slab","name":"Lifeline (<=50 units)","aliases":["lifeline","50 units"]},
+ {"id":"vat","type":"Charge","name":"VAT and demand charge","aliases":["vat","demand charge","sanctioned"]},
+ {"id":"bill","type":"Outcome","name":"Monthly bill","aliases":["bill","bills","tariff","taka","tk","বিল","দাম"]},
+ {"id":"peak","type":"Grid","name":"Evening peak","aliases":["peak","9 pm","evening","megawatt","mw","grid"]},
+ {"id":"loadshed","type":"Grid","name":"Load-shedding","aliases":["load-shedding","loadshedding","power cut","লোডশেডিং"]},
+ {"id":"heat","type":"Risk","name":"Dangerous heat","aliases":["heat","heat index","heatwave","hot","heat illness"]},
+ {"id":"vulnerable","type":"Risk","name":"Vulnerable household member","aliases":["elderly","infant","pregnant","ill","vulnerable"]},
+ {"id":"slabguard","type":"Feature","name":"Slab Guard","aliases":["slab guard","forecast","month-end"]},
+ {"id":"twin","type":"Feature","name":"Home twin","aliases":["home twin","twin","nameplate","base load"]},
+ {"id":"hero","type":"Feature","name":"Peak Hour Hero","aliases":["peak hour hero","challenge","challenges","demand response"]},
+ {"id":"privacy","type":"Feature","name":"Privacy","aliases":["privacy","data","consent","gps","safe"]},
+ {"id":"meter","type":"Device","name":"Prepaid / postpaid meter","aliases":["meter","prepaid","postpaid","reading","photo","মিটার"]}
+],
+"edges": [
+ ["ac","drives","peak"],["fan","drives","peak"],["setpoint","reduces","ac"],["shift","moves_out_of","peak"],["pump","can_shift","shift"],
+ ["slab400","raises","bill"],["lifeline","lowers","bill"],["vat","adds_to","bill"],["slabguard","warns_about","slab400"],["slabguard","suggests","setpoint"],
+ ["twin","estimates","ac"],["twin","feeds","slabguard"],["hero","reduces","peak"],["hero","uses","setpoint"],["hero","uses","shift"],
+ ["peak","causes","loadshed"],["heat","blocks","hero"],["vulnerable","limits","setpoint"],["lifeline","excluded_from","hero"],["meter","feeds","twin"],["privacy","protects","meter"]
+]
+}

@@ -13,7 +13,9 @@ ClimateSphere AI → Energy Brain · International AI Builders Congress 2026 · 
 | `api/main.py` | FastAPI: `/health`, `/tariff`, `/ocr/meter` (Gemini vision → strict JSON), `/twin/nameplate` | runs |
 | `local/redactor.py` | Runs on the team laptop: Tesseract + regex + Ollama qwen2.5 removes personal data from bill photos | needs Tesseract + Ollama |
 | `mcp/server.py` | `bill-bachao-mcp` (FastMCP): read-only tools over stdio or Streamable HTTP (`/mcp` on port 8001) | runs |
-| `db/schema.sql` | Supabase tables, row-level security, tariff seed, vector search function | **deployed** (Supabase, Singapore) |
+| `db/schema.sql` | Supabase tables, row-level security, tariff seed | **deployed** (Supabase, Singapore) |
+| `knowledge/`, `rag/` | Coach knowledge base (5 docs, 28 chunks), context lines, knowledge graph, retrieval test | **deployed**, 15/15 hit@3 |
+| `supabase/` | Edge Functions `embed-chunks` + `coach` (hybrid RAG + graph) and the RAG migration | **deployed** |
 | `scripts/seed_demo.py` | 60 days of SIMULATED readings for the public demo | runs |
 | `web/` | Public prototype: dashboard, Slab Guard, home twin, tariff, Peak Hour Hero preview | live on GitHub Pages |
 | `docs/` | Architecture, master prompt | |
@@ -33,9 +35,10 @@ cd api && uvicorn main:app --reload --port 8000         # open http://localhost:
 |---|---|
 | Tariff calculator | Real, unit-tested |
 | Meter OCR | Real (Gemini vision) |
+| Coach retrieval (hybrid RAG + knowledge graph) | Real, live in Supabase; answer generation waits for a Gemini key |
 | Bill redaction | Real on team laptop |
 | Demo household "Rina" | Simulated |
 | Peak Hour Hero / MW map | Planned for the final; totals will be simulated |
 
 ## AI tooling disclosure
-Starter code drafted with an AI assistant (Claude) and reviewed and tested by the team. Rules files: `.cursor/rules`.
+Starter code drafted with an AI assistant (Claude) and reviewed and tested by the team. Rules files: `.cursor/rules`. The one-line chunk contexts in `rag/context_lines.json` and the knowledge graph were drafted with Claude and checked by the team.

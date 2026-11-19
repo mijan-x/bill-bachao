@@ -1,0 +1,226 @@
+[
+ {
+  "id": "app-faq-0",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "How do I read my prepaid meter?",
+  "text": "Most prepaid meters cycle through several screens. Photograph the screen that shows the remaining balance in taka or the total kWh used. Hold the phone straight, avoid glare, and make sure all digits are sharp. Bill Bachao reads the digits; if it is not sure, it asks you to confirm.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-1",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "What is the home twin?",
+  "text": "The home twin is a small model of your home's electricity use. At first it uses your appliances' nameplate watts and hours. After seven or more meter readings it learns how much your use rises on hot days, so it can split your bill into base load and cooling.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-2",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "What is Slab Guard?",
+  "text": "Slab Guard projects how many units you will use by the end of the month and warns you before you cross into a more expensive tariff block, especially the jump above 400 units. It also shows the smallest change, such as raising the AC by one or two degrees, that keeps you under.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-3",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "Why does my bill go up so much in summer?",
+  "text": "In summer, fans and air conditioners run for many more hours. More units push you into higher tariff blocks, so the extra units cost more than the first ones. Above 400 units each extra unit costs Tk 15.01 instead of Tk 9.62.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-4",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "Is my data safe?",
+  "text": "You choose what to share for each purpose: photos, AI chat, peak challenges and offers. Each household sees only its own data. Partners such as electricity distributors see only area totals.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-5",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "বিল বাঁচাও কী?",
+  "text": "বিল বাঁচাও মিটারের একটি ছবি থেকে আপনার বিদ্যুৎ বিল কমাতে সাহায্য করে। এটি মাসের শেষে কত ইউনিট হবে তা অনুমান করে এবং বেশি দামের স্ল্যাবে যাওয়ার আগে সতর্ক করে।",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "app-faq-6",
+  "doc": "app-faq.md",
+  "doc_title": "Bill Bachao app FAQ",
+  "section": "৪০০ ইউনিটের পরে দাম কত?",
+  "text": "জুন ২০২৬ থেকে ৪০০ ইউনিটের পরের প্রতিটি ইউনিটের দাম ১৫.০১ টাকা, আর ৩০১ থেকে ৪০০ ইউনিট পর্যন্ত ৯.৬২ টাকা।",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md"
+ },
+ {
+  "id": "cooling-7",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "Why cooling drives the evening peak",
+  "text": "Bangladesh's electricity demand roughly doubles from winter to summer. In February 2025 the power adviser said winter demand is around 9,000 MW but summer demand rises to 17,000-18,000 MW (banglanews24). IEEFA reported that on 27 August 2026 demand peaked at 19,027 MW at 9 PM, and that household fan use peaks around 9 PM.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "cooling-8",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "How much power air conditioners use",
+  "text": "Government officials estimated that air conditioners account for about 5,000-6,000 MW of summer demand, and said setting thermostats to 25 C could save 2,000-3,000 MW (banglanews24, February 2025). Another statement put AC load at 4,000-5,000 MW with about 2,000 MW of possible savings (The Business Standard).",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "cooling-9",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "The 25 C advice",
+  "text": "The Cabinet Division asked government and private offices and households to keep air conditioners at 25 C or higher (Dhaka Tribune). It is a voluntary appeal: nobody measures or rewards who follows it. Bill Bachao turns it into a measured, optional challenge.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "cooling-10",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "How much one degree saves",
+  "text": "A Daily Star opinion piece reported that raising the AC thermostat by 1 C can save up to about 6 percent of AC energy. Bill Bachao uses a cautious range of 3 to 6 percent per degree and always shows savings as a range, not one exact number.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "cooling-11",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "Efficient fans",
+  "text": "IEEFA estimated that household fans add up to 5,212 MW to summer demand, that energy-efficient BLDC fans are less than 2 percent of household fans, and that replacing old fans with BLDC models could cut summer peak demand by up to 2,590 MW (IEEFA, November 2026).",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "cooling-12",
+  "doc": "cooling.md",
+  "doc_title": "Air conditioners, fans and the summer peak",
+  "section": "Inverter air conditioners",
+  "text": "Inverter ACs adjust compressor speed instead of switching fully on and off, so they usually use less electricity for the same cooling. Bill Bachao's upgrade advisor compares nameplate watts and the user's tariff to estimate payback months.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "peak-13",
+  "doc": "peak.md",
+  "doc_title": "Peak hours, load-shedding and demand response",
+  "section": "What the peak is",
+  "text": "The evening peak is the time of day when the grid carries the most load. In Bangladesh's summer it falls in the evening, around 7 to 11 PM, with the highest demand around 9 PM (IEEFA). When supply cannot meet the peak, distributors cut power to some areas, which is load-shedding.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "peak-14",
+  "doc": "peak.md",
+  "doc_title": "Peak hours, load-shedding and demand response",
+  "section": "Why the peak is expensive",
+  "text": "Meeting the last few hundred megawatts at the peak often needs the most expensive power plants. BPDB projected an average generation cost of about Tk 12.91 per unit for fiscal 2026-27 (EP-BD), above most residential tariff blocks, so every unit moved out of the peak helps.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "peak-15",
+  "doc": "peak.md",
+  "doc_title": "Peak hours, load-shedding and demand response",
+  "section": "What demand response means",
+  "text": "Demand response means asking users to reduce or shift electricity use for a short time when the grid is stressed, and rewarding them for it. Large programmes usually need smart meters. Bill Bachao does it with phone photos of ordinary meters: a reading before and after the challenge window shows what the home actually used.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "peak-16",
+  "doc": "peak.md",
+  "doc_title": "Peak hours, load-shedding and demand response",
+  "section": "Shifting versus saving",
+  "text": "Raising the AC set-point saves energy. Running the water pump, iron or washing machine after 11 PM does not save energy but moves it out of the peak. Bill Bachao counts these separately as kWh saved and kWh moved.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "peak-17",
+  "doc": "peak.md",
+  "doc_title": "Peak hours, load-shedding and demand response",
+  "section": "Peak Hour Hero",
+  "text": "On hot evenings Bill Bachao sends a voluntary challenge for the peak window, for example keeping the AC at 26 or 27 C and running heavy appliances after 11 PM. Users accept with one tap, photograph the meter at the start and end, and earn points. Area totals are shown to partners only as aggregates.",
+  "source_url": "https://ieefa.org/articles/energy-efficient-fans-could-cut-bangladeshs-peak-power-demand-2590mw-ieefa"
+ },
+ {
+  "id": "safety-18",
+  "doc": "safety.md",
+  "doc_title": "Heat safety and fairness rules in Bill Bachao",
+  "section": "Safety comes before saving",
+  "text": "Bill Bachao never asks anyone to set an AC above 27 C and never asks anyone to switch fans off. Comfort and health come first; challenges are always optional and saying no costs nothing.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/safety.md"
+ },
+ {
+  "id": "safety-19",
+  "doc": "safety.md",
+  "doc_title": "Heat safety and fairness rules in Bill Bachao",
+  "section": "Homes with vulnerable members",
+  "text": "If a household marks an elderly person, an infant, a pregnant woman or someone who is ill, its AC limit is 26 C. On nights when the heat index is above 41 C, that household receives no challenge at all, only safety tips.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/safety.md"
+ },
+ {
+  "id": "safety-20",
+  "doc": "safety.md",
+  "doc_title": "Heat safety and fairness rules in Bill Bachao",
+  "section": "Lifeline households",
+  "text": "Households using 50 units or less a month are lifeline consumers. They receive saving tips but never peak challenges, so the poorest homes do not carry the grid's problem.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/safety.md"
+ },
+ {
+  "id": "safety-21",
+  "doc": "safety.md",
+  "doc_title": "Heat safety and fairness rules in Bill Bachao",
+  "section": "Signs of heat illness",
+  "text": "Dizziness, confusion, very high body temperature, or stopping sweating in strong heat can be signs of heat illness. Bill Bachao does not give medical advice: in an emergency in Bangladesh call 999 or go to the nearest health centre. Drink water, stay in shade, and keep fans running.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/safety.md"
+ },
+ {
+  "id": "safety-22",
+  "doc": "safety.md",
+  "doc_title": "Heat safety and fairness rules in Bill Bachao",
+  "section": "Privacy rules",
+  "text": "Bill photos are cleaned of names, addresses and account numbers on the team's own computer before any cloud model sees them. The app does not collect GPS or contacts; the area is stored at thana level. Photos are deleted after 30 days.",
+  "source_url": "https://github.com/mijan-x/bill-bachao/blob/main/knowledge/safety.md"
+ },
+ {
+  "id": "tariff-23",
+  "doc": "tariff.md",
+  "doc_title": "Residential electricity tariff in Bangladesh (BERC, June 2026)",
+  "section": "How the residential slabs work",
+  "text": "Residential (LT-A) electricity is billed in progressive blocks. Each block of units in a month is charged at its own rate, so only the units inside a higher block cost more, not the whole bill. From the June 2026 billing cycle the reported rates are: first 75 units Tk 5.26 per unit; units 76 to 200 Tk 8.50; units 201 to 300 Tk 9.10; units 301 to 400 Tk 9.62; units 401 to 600 Tk 15.01; above 600 units a higher top rate applies (Bill Bachao stores Tk 17.35 and asks users to verify it on their bill).\nSources: The Financial Express (power tariff adjustment, June 2026); Daily Observer (4 June 2026); Dhaka Tribune (units above the first 75 billed at Tk 8.50).",
+  "source_url": "https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens"
+ },
+ {
+  "id": "tariff-24",
+  "doc": "tariff.md",
+  "doc_title": "Residential electricity tariff in Bangladesh (BERC, June 2026)",
+  "section": "The lifeline rate",
+  "text": "Households whose total use in a month stays at or below 50 units are lifeline consumers. All of their units are billed at the lifeline rate of Tk 4.63 per unit. Going above 50 units moves the household onto the normal blocks.",
+  "source_url": "https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens"
+ },
+ {
+  "id": "tariff-25",
+  "doc": "tariff.md",
+  "doc_title": "Residential electricity tariff in Bangladesh (BERC, June 2026)",
+  "section": "The 400-unit jump",
+  "text": "The biggest price step is at 400 units. A unit inside the 301-400 block costs Tk 9.62, but every unit above 400 costs Tk 15.01, about 56 percent more. Reporting in August 2026 said many households saw higher bills because rising use pushed them into higher slabs, especially above 600 units. Staying just under 400 units can therefore save a noticeable amount.",
+  "source_url": "https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens"
+ },
+ {
+  "id": "tariff-26",
+  "doc": "tariff.md",
+  "doc_title": "Residential electricity tariff in Bangladesh (BERC, June 2026)",
+  "section": "VAT and the demand charge",
+  "text": "A 5 percent VAT is added on top of the energy charge. Bills also carry a demand charge based on the sanctioned load in kilowatts; the exact amount is printed on the bill and Bill Bachao lets the user enter it.",
+  "source_url": "https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens"
+ },
+ {
+  "id": "tariff-27",
+  "doc": "tariff.md",
+  "doc_title": "Residential electricity tariff in Bangladesh (BERC, June 2026)",
+  "section": "How Bill Bachao uses the tariff",
+  "text": "Bill Bachao never asks an AI model to calculate a bill. A tested tariff function applies the blocks, the lifeline rule, the demand charge and VAT, and the coach only explains the result.",
+  "source_url": "https://thefinancialexpress.com.bd/views/views/power-tariff-adjustment-alone-will-not-reduce-subsidy-burdens"
+ }
+]

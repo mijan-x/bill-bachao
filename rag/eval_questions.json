@@ -1,0 +1,17 @@
+[
+ {"q":"How much does each unit cost after 400 units?","expect":["tariff-25","app-faq-3","tariff-23","app-faq-6"]},
+ {"q":"What is the lifeline rate for small households?","expect":["tariff-24","safety-20"]},
+ {"q":"Is VAT added to my electricity bill?","expect":["tariff-26"]},
+ {"q":"Why is my bill so high in summer?","expect":["app-faq-3","cooling-7","tariff-25"]},
+ {"q":"How much energy do I save by raising the AC one degree?","expect":["cooling-10","cooling-8"]},
+ {"q":"What does Slab Guard do?","expect":["app-faq-2"]},
+ {"q":"When is the evening peak in Bangladesh?","expect":["peak-13","cooling-7"]},
+ {"q":"Why does load-shedding happen?","expect":["peak-13"]},
+ {"q":"Is shifting the water pump to night the same as saving energy?","expect":["peak-16"]},
+ {"q":"How do I take a photo of my prepaid meter?","expect":["app-faq-0"]},
+ {"q":"My grandmother is old, will you ask us to join the challenge on very hot nights?","expect":["safety-19","safety-18"]},
+ {"q":"What are the signs of heat illness?","expect":["safety-21"]},
+ {"q":"Do you collect my GPS location?","expect":["safety-22","app-faq-4"]},
+ {"q":"Do BLDC fans reduce peak demand?","expect":["cooling-11"]},
+ {"q":"৪০০ ইউনিটের পরে দাম কত?","expect":["app-faq-6","tariff-25"]}
+]
