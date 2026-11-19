@@ -83,3 +83,44 @@ $$;
 
 revoke execute on function public.hybrid_search(text, extensions.vector, int, float) from anon;
 revoke execute on function public.related_topics(text) from anon;
+
+-- ===== Safety-first ranking (migration safety_first_ranking) =====
+update public.kg_nodes set aliases = aliases || array['old','older','grandmother','grandfather','grandma','grandpa','baby','child','children','sick','patient','নানি','দাদি','বৃদ্ধ','শিশু','অসুস্থ'] where id = 'vulnerable';
+update public.kg_nodes set aliases = aliases || array['hot night','very hot','গরম'] where id = 'heat';
+-- hybrid_search now takes safety_weight (default 0.02): chunks linked to a Risk entity named in the
+-- question get +safety_weight per matched risk, so safety rules lead whenever heat or a vulnerable member is mentioned.
+drop function if exists public.hybrid_search(text, extensions.vector, int, float);
+create or replace function public.hybrid_search(
+  query_text text, query_embedding extensions.vector(384), match_count int default 5,
+  graph_weight float default 0.01, safety_weight float default 0.02)
+returns table (chunk_key text, doc_title text, section text, source_url text, chunk_text text,
+               vec_rank int, fts_rank int, graph_hit boolean, score float)
+language sql stable set search_path = public, extensions as $$
+with q as (select lower(query_text) as t),
+seed as (select n.id, n.type from kg_nodes n, q where exists (select 1 from unnest(n.aliases) a where public.alias_in(a, q.t))),
+vec as (
+  select c.chunk_key, row_number() over (order by c.embedding <=> query_embedding)::int as r
+  from rag_chunks c where c.embedding is not null order by c.embedding <=> query_embedding limit 20),
+fts as (
+  select c.chunk_key, row_number() over (order by ts_rank_cd(c.fts, websearch_to_tsquery('simple', query_text)) desc)::int as r
+  from rag_chunks c where c.fts @@ websearch_to_tsquery('simple', query_text) limit 20),
+fts_or as (
+  select c.chunk_key, row_number() over (order by ts_rank_cd(c.fts, to_tsquery('simple', w.q)) desc)::int as r
+  from rag_chunks c,
+       (select string_agg(quote_literal(x), ' | ') as q
+          from unnest(regexp_split_to_array(lower(query_text), '[^[:alnum:]]+')) x
+         where length(x) > 2
+           and x not in ('the','and','for','what','how','why','does','can','you','are','with','that','this','from','much','many','who','when','will','should','not','but','about','into','has','have','was','is','my','our','your')) w
+  where w.q is not null and c.fts @@ to_tsquery('simple', w.q) limit 20),
+kw as (select * from fts union all select * from fts_or where not exists (select 1 from fts)),
+g as (select ce.chunk_key, count(*) filter (where s.type = 'Risk') as risks
+      from chunk_entities ce join seed s on ce.node_id = s.id group by ce.chunk_key),
+fused as (select coalesce(v.chunk_key, k.chunk_key) as chunk_key, v.r as vr, k.r as kr
+          from vec v full outer join kw k on v.chunk_key = k.chunk_key)
+select c.chunk_key, c.doc_title, c.section, c.source_url, c.chunk_text, f.vr, f.kr, (g.chunk_key is not null),
+       coalesce(1.0/(60+f.vr),0) + coalesce(1.0/(60+f.kr),0)
+       + case when g.chunk_key is not null then graph_weight else 0 end + coalesce(g.risks,0) * safety_weight
+from fused f join rag_chunks c on c.chunk_key = f.chunk_key left join g on g.chunk_key = f.chunk_key
+order by 9 desc limit match_count;
+$$;
+revoke execute on function public.hybrid_search(text, extensions.vector, int, float, float) from anon;

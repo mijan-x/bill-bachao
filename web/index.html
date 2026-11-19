@@ -30,6 +30,10 @@
   table { width:100%; border-collapse:collapse; font-size:.9rem; } th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); } th { color:var(--muted); font-weight:600; }
   button.main { background:var(--teal); color:#fff; border:0; border-radius:10px; padding:11px 16px; font:inherit; font-weight:600; cursor:pointer; margin-top:10px; }
   button.ghost { background:#fff; color:var(--teal); border:1px solid var(--teal); border-radius:10px; padding:7px 12px; font:inherit; cursor:pointer; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; } .chips button { border:1px solid var(--line); background:var(--bg); border-radius:999px; padding:6px 12px; font:inherit; font-size:.85rem; cursor:pointer; color:var(--ink); }
+  .src { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:8px 0; background:#fff; } .src .tag { font-family:'Inter',sans-serif; font-size:.74rem; color:var(--muted); }
+  .src .tag b { color:var(--teal); } .pill { display:inline-block; border-radius:6px; padding:0 6px; margin-left:4px; font-size:.72rem; background:var(--bg); }
+  textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; font:inherit; resize:vertical; }
   .why { font-size:.85rem; color:var(--muted); background:var(--bg); border-radius:8px; padding:8px 10px; margin-top:8px; }
   svg text { font-family:'Inter',sans-serif; font-size:11px; fill:var(--muted); }
   footer { text-align:center; color:var(--muted); font-size:.82rem; padding:20px 12px 40px; }
@@ -47,6 +51,7 @@
   <button data-t="twin">হোম টুইন · Home twin</button>
   <button data-t="tariff">বিল হিসাব · Tariff</button>
   <button data-t="peak">পিক আওয়ার হিরো · Peak Hour Hero</button>
+  <button data-t="coach">কোচকে জিজ্ঞাসা · Ask the coach</button>
   <button data-t="about">About</button>
 </nav>
 <main>
@@ -125,6 +130,19 @@
   </div>
 </section>
 
+<section id="coach">
+  <div class="card">
+    <h2>Ask the coach · কোচকে জিজ্ঞাসা করুন <span class="sim" style="background:#dcfce7;color:#15803d">Live</span></h2>
+    <p class="muted">Questions go to our live coach on Supabase. It searches a source-cited knowledge base (BERC tariff, cooling, the evening peak, safety rules, app FAQ) with hybrid search: meaning (vector) + keywords + a small knowledge graph. Ask in Bangla or English.</p>
+    <div class="chips" id="coachChips"></div>
+    <label for="coachQ">Your question · আপনার প্রশ্ন</label>
+    <textarea id="coachQ" rows="2" maxlength="500" placeholder="e.g. Why is my bill so high in summer?"></textarea>
+    <button class="main" id="coachBtn">Ask · জিজ্ঞাসা করুন</button>
+    <div id="coachOut" aria-live="polite"></div>
+    <div class="why">The coach never calculates a bill (the tariff calculator does) and follows the safety rules: no AC above 27°C, never fans off, no medical advice. Written answers switch on when the AI key is added; until then it shows the best-matching sources, which are always shown so you can check them.</div>
+  </div>
+</section>
+
 <section id="about">
   <div class="card">
     <h2>About this prototype</h2>
@@ -139,7 +157,9 @@
       <tr><td>Bill redaction on local Ollama</td><td>Built in the repo; runs on the team laptop</td></tr>
       <tr><td>MCP server (bill-bachao-mcp)</td><td>Built; stdio + Streamable HTTP</td></tr>
       <tr><td>Demo household "Rina", neighbourhood MW</td><td><span class="sim">Simulated</span></td></tr>
-      <tr><td>Peak Hour Hero verification, coach, RAG</td><td>In progress for the final</td></tr>
+      <tr><td>Coach search (hybrid RAG + knowledge graph on Supabase)</td><td>Real and live; 15/15 test questions found the right source in the top 3</td></tr>
+      <tr><td>Coach written answers (Gemini)</td><td>Built; switches on when the AI key is added</td></tr>
+      <tr><td>Peak Hour Hero verification</td><td>In progress for the final</td></tr>
     </table>
     <h3>Code</h3>
     <p>Source: <a id="repoLink" href="https://github.com/mijan-x/bill-bachao">github.com/mijan-x/bill-bachao</a></p>
@@ -259,6 +279,43 @@ $('pkBtn').onclick = () => {
 };
 $('pkBtn').click();
 $('sgBtn').click();
+/* ---------- Coach (live: Supabase Edge Function, hybrid RAG + knowledge graph) ---------- */
+(function coach() {
+  const URL_ = 'https://vkakhpqfhugaponhgubg.supabase.co/functions/v1/coach';
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const samples = ['Why is my bill so high in summer?', '৪০০ ইউনিটের পরে দাম কত?', 'How much do I save by raising the AC one degree?',
+                   'My grandmother is old — will you send us a challenge on very hot nights?', 'Is running the pump at night the same as saving energy?', 'Do you collect my GPS location?'];
+  $('coachChips').innerHTML = samples.map((q, i) => `<button data-i="${i}">${esc(q)}</button>`).join('');
+  $('coachChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('coachQ').value = samples[+b.dataset.i]; ask(); };
+  $('coachBtn').onclick = ask;
+  $('coachQ').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } });
+  async function ask() {
+    const q = $('coachQ').value.trim();
+    if (!q) { $('coachQ').focus(); return; }
+    $('coachBtn').disabled = true;
+    $('coachOut').innerHTML = '<p class="muted">Searching the knowledge base… · খুঁজছি…</p>';
+    try {
+      const r = await fetch(URL_, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q, k: 3 }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.status);
+      const top = j.sources[0];
+      let html = j.answer
+        ? `<div class="alert good"><b>Coach:</b> ${esc(j.answer)}</div>`
+        : (top ? `<div class="alert good"><b>Best match · সবচেয়ে মিল:</b> ${esc(top.section)}<br>${esc(top.text)}</div>` : '<div class="alert warn">No matching source found.</div>');
+      html += `<h3>Sources · উৎস</h3>` + j.sources.map(s => `<div class="src"><div class="tag"><b>[${s.n}] ${esc(s.doc)}</b> — ${esc(s.section)}
+        <span class="pill">vector #${s.vec_rank ?? '–'}</span><span class="pill">keyword #${s.fts_rank ?? '–'}</span>${s.graph_hit ? '<span class="pill">graph ✓</span>' : ''}</div>
+        <div style="font-size:.9rem;margin-top:4px">${esc(s.text.length > 320 ? s.text.slice(0, 320) + '…' : s.text)}</div>
+        <div class="tag"><a href="${esc(s.url)}" target="_blank" rel="noopener">source</a></div></div>`).join('');
+      const rel = [...new Set((j.related_topics || []).map(t => t.related))].slice(0, 6);
+      if (rel.length) html += `<p class="muted">Related topics from the knowledge graph: ${rel.map(esc).join(' · ')}</p>`;
+      html += `<p class="muted">Mode: ${j.mode === 'rag+llm' ? 'retrieval + written answer (' + esc(j.model) + ')' : 'retrieval only'}.</p>`;
+      $('coachOut').innerHTML = html;
+    } catch (err) {
+      $('coachOut').innerHTML = `<div class="alert warn">The coach could not be reached (${esc(err.message)}). Please try again in a moment.</div>`;
+    } finally { $('coachBtn').disabled = false; }
+  }
+})();
+
 // open a tab from the URL, e.g. index.html#slab
 const h = location.hash.slice(1); const tb = document.querySelector(`#tabs button[data-t="${h}"]`); if (tb) tb.click();
 </script>

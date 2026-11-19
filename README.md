@@ -14,7 +14,7 @@ ClimateSphere AI → Energy Brain · International AI Builders Congress 2026 · 
 | `local/redactor.py` | Runs on the team laptop: Tesseract + regex + Ollama qwen2.5 removes personal data from bill photos | needs Tesseract + Ollama |
 | `mcp/server.py` | `bill-bachao-mcp` (FastMCP): read-only tools over stdio or Streamable HTTP (`/mcp` on port 8001) | runs |
 | `db/schema.sql` | Supabase tables, row-level security, tariff seed | **deployed** (Supabase, Singapore) |
-| `knowledge/`, `rag/` | Coach knowledge base (5 docs, 28 chunks), context lines, knowledge graph, retrieval test | **deployed**, 15/15 hit@3 |
+| `knowledge/`, `rag/` | Coach knowledge base (5 docs, 28 chunks), context lines, knowledge graph, retrieval test | **deployed**, 15/15 top-3 |
 | `supabase/` | Edge Functions `embed-chunks` + `coach` (hybrid RAG + graph) and the RAG migration | **deployed** |
 | `scripts/seed_demo.py` | 60 days of SIMULATED readings for the public demo | runs |
 | `web/` | Public prototype: dashboard, Slab Guard, home twin, tariff, Peak Hour Hero preview | live on GitHub Pages |

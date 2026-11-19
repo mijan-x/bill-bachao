@@ -24,19 +24,20 @@ flowchart LR
 | Vector search (gte-small embeddings, HNSW cosine index) | `supabase/functions/embed-chunks`, migration |
 | Full-text search (`tsvector` generated column, GIN index) | migration |
 | Hybrid fusion (reciprocal rank fusion, k = 60) | `hybrid_search()` |
+| Safety-first ranking (chunks linked to a named risk, e.g. heat or an elderly member, get +0.02 per risk) | `hybrid_search(..., safety_weight)` |
 | Knowledge graph (entities, relations, chunk links; boost + related topics) | `rag/graph.json`, `kg_*` tables, `related_topics()` |
 | Guardrails in the answer prompt (no bill maths by the LLM, AC ≤ 27 C, fans never off, no medical advice) | `supabase/functions/coach/index.ts` |
 
 ## Retrieval test (`eval_results.json`)
 15 questions (14 English, 1 Bangla), each with the chunk(s) that should come back, run against the live coach:
 
-| Metric | Result |
-|---|---|
-| Correct chunk in top 3 | 15 / 15 |
-| Correct chunk ranked first | 14 / 15 |
-| MRR@3 | 0.967 |
+| Metric | Run 1 | Run 2 (after safety-first rule) |
+|---|---|---|
+| Correct chunk in top 3 | 15 / 15 | 15 / 15 |
+| Correct chunk ranked first | 14 / 15 | 15 / 15 |
+| MRR@3 | 0.967 | 1.000 |
 
-This is a small set we wrote ourselves, so it is a sanity check, not a benchmark. Generated answers have not been tested yet: the live function runs in retrieval-only mode until a `GEMINI_API_KEY` secret is added.
+In run 1 the elderly-member question ranked the challenge chunk above the safety rule, so we added the safety-first rule. Run 2 is therefore not an independent test, and the set is small and written by us: a sanity check, not a benchmark. A held-out set is planned for the final. Generated answers have not been tested yet: the live function runs in retrieval-only mode until a `GEMINI_API_KEY` secret is added.
 
 ## Rebuild
 ```bash

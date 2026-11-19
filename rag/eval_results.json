@@ -4,12 +4,14 @@
  "embedding": "gte-small, 384-dim, built into Supabase Edge Functions",
  "mode": "retrieval-only (no GEMINI_API_KEY secret set, so no generated answers were tested)",
  "n": 15,
- "hybrid_hit_at_1": "14/15",
+ "hybrid_hit_at_1": "15/15",
  "hybrid_hit_at_3": "15/15",
- "hybrid_mrr_at_3": 0.967,
+ "hybrid_mrr_at_3": 1.0,
  "notes": [
   "Small test set written by the team, so these numbers are a sanity check, not a benchmark.",
-  "Vector rank 1 was a correct chunk for all 15 questions; the fused (hybrid) rank 1 was correct for 14. In Q11 the keyword match pulled the Peak Hour Hero chunk above the safety rule; the safety chunk is still #2.",
+  "Run 1: 14/15 ranked first. In Q11 (elderly member, hot night) the keyword match put the Peak Hour Hero chunk above the safety rule.",
+  "We then added a safety-first rule: chunks linked to a risk named in the question (dangerous heat, vulnerable member) get +0.02 per risk, and added everyday aliases (old, grandmother, child, sick, Bangla words). Run 2: 15/15 ranked first; the other 14 results did not change.",
+  "Because the rule was added after seeing run 1, run 2 is not an independent test. A held-out question set is planned for the final.",
   "Q15 is in Bangla and retrieved the Bangla FAQ chunk first."
  ],
  "results": [
@@ -269,6 +271,24 @@
    ],
    "top3": [
     {
+     "chunk": "safety-19",
+     "vector_rank": 1,
+     "fts_rank": 2
+    },
+    {
+     "chunk": "peak-17",
+     "vector_rank": 2,
+     "fts_rank": 1
+    },
+    {
+     "chunk": "safety-21",
+     "vector_rank": 6,
+     "fts_rank": 6
+    }
+   ],
+   "first_correct_rank": 1,
+   "top3_run1": [
+    {
      "chunk": "peak-17",
      "vector_rank": 2,
      "fts_rank": 1
@@ -284,7 +304,7 @@
      "fts_rank": 3
     }
    ],
-   "first_correct_rank": 2
+   "first_correct_rank_run1": 2
   },
   {
    "question": "What are the signs of heat illness?",
@@ -384,5 +404,10 @@
    ],
    "first_correct_rank": 1
   }
- ]
+ ],
+ "run_1": {
+  "hybrid_hit_at_1": "14/15",
+  "hybrid_hit_at_3": "15/15",
+  "hybrid_mrr_at_3": 0.967
+ }
 }

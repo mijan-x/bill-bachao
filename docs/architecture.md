@@ -23,6 +23,6 @@ flowchart TD
 | MCP server | Built (`mcp/server.py`, stdio + Streamable HTTP at `/mcp`) |
 | Database schema + RLS | Built (`db/schema.sql`) |
 | Public demo | Built (`web/`, simulated household) |
-| Coach retrieval: contextual chunks, hybrid search (vector + full-text, RRF), knowledge graph | Built, live in Supabase (`rag/`, `supabase/`); 15/15 hit@3 on our test set |
+| Coach retrieval: contextual chunks, hybrid search (vector + full-text, RRF), knowledge graph | Built, live in Supabase (`rag/`, `supabase/`); 15/15 top-3 and 15/15 first on our test set |
 | Coach answer generation (Gemini, grounded in sources) | Written; switches on when the `GEMINI_API_KEY` secret is set |
 | Peak Hour Hero verification, n8n workflows | Planned for the final |
