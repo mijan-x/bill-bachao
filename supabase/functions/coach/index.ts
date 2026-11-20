@@ -53,17 +53,31 @@ Deno.serve(async (req) => {
     if (quota !== "ok") { limited = "Daily limit for written answers reached; showing sources only."; key = undefined; }
   }
   if (key && sources.length) {
-    model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+    model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash-lite";
     const ctx = sources.map((s) => `[${s.n}] ${s.doc} — ${s.section}\n${s.text}`).join("\n\n");
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: [{ role: "user", parts: [{ text: `Sources:\n${ctx}\n\nQuestion: ${question}` }] }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 400 },
-      }),
-    });
+    const call = (thinking: boolean, m: string = model!) => {
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 20_000);
+      return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+        method: "POST", signal: ctl.signal,
+        headers: { "content-type": "application/json", "x-goog-api-key": key! },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM }] },
+          contents: [{ role: "user", parts: [{ text: `Sources:\n${ctx}\n\nQuestion: ${question}` }] }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 1024, ...(thinking ? { thinkingConfig: { thinkingLevel: "LOW" } } : {}) },
+        }),
+      }).finally(() => clearTimeout(timer));
+    };
+    let r: Response = new Response(null, { status: 599 });
+    const FALLBACK = "gemini-flash-lite-latest";
+    const tryModel = async (m: string) => {
+      let res = await call(true, m);
+      if (res.status === 400 && /thinking/i.test(await res.clone().text())) res = await call(false, m);
+      return res;
+    };
+    try {
+      try { r = await tryModel(model); } catch { r = new Response(null, { status: 504 }); }
+      if ([404, 429, 500, 503, 504].includes(r.status) && model !== FALLBACK) { model = FALLBACK; r = await tryModel(FALLBACK); }
+    } catch { limited = "The AI answer timed out; showing sources only."; }
     if (r.ok) {
       const j = await r.json();
       answer = j?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? null;

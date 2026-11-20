@@ -77,15 +77,37 @@ Deno.serve(async (req) => {
       : "The demo's daily photo limit is reached. Please try again tomorrow." }, 429);
   }
 
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-goog-api-key": key },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ inline_data: { mime_type: photo.type, data: encodeBase64(bytes) } }, { text: PROMPT }] }],
-      generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: SCHEMA, maxOutputTokens: 300 },
-    }),
-  });
+  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash-lite";
+  // Reading digits needs little reasoning: ask for LOW thinking (fast). Older models reject the field -> retry without it.
+  const call = (thinking: boolean, m: string = model) => {
+    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 25_000);
+    return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
+      method: "POST", signal: ctl.signal,
+      headers: { "content-type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ inline_data: { mime_type: photo!.type, data: b64 } }, { text: PROMPT }] }],
+        generationConfig: {
+          temperature: 0, responseMimeType: "application/json", responseSchema: SCHEMA, maxOutputTokens: 1024,
+          ...(thinking ? { thinkingConfig: { thinkingLevel: "LOW" } } : {}),
+        },
+      }),
+    }).finally(() => clearTimeout(timer));
+  };
+  const b64 = encodeBase64(bytes);
+  let r: Response;
+  const FALLBACK = "gemini-flash-lite-latest";
+  const tryModel = async (m: string) => {
+    let res = await call(true, m);
+    if (res.status === 400 && /thinking/i.test(await res.clone().text())) res = await call(false, m);
+    return res;
+  };
+  let used = model;
+  try {
+    try { r = await tryModel(model); } catch { r = new Response(null, { status: 504 }); }
+    if ([404, 429, 500, 503, 504].includes(r.status) && model !== FALLBACK) { used = FALLBACK; r = await tryModel(FALLBACK); }
+  } catch {
+    return json({ error: "The AI model took too long to read this photo. Please try again." }, 504);
+  }
   if (!r.ok) {
     const detail = (await r.text()).slice(0, 200);
     return json({ error: `The AI model could not read this photo (HTTP ${r.status}). Please retake it.`, detail }, 502);
@@ -97,7 +119,7 @@ Deno.serve(async (req) => {
 
   const conf = Math.min(Math.max(Number(reading.confidence) || 0, 0), 1);
   const u = j?.usageMetadata;
-  if (u) await db.from("token_usage").insert({ feature: "ocr_meter", model, input_tokens: u.promptTokenCount, output_tokens: u.candidatesTokenCount });
+  if (u) await db.from("token_usage").insert({ feature: "ocr_meter", model: used, input_tokens: u.promptTokenCount, output_tokens: u.candidatesTokenCount });
 
   return json({
     kwh_cumulative: reading.kwh_cumulative ?? null,
@@ -106,7 +128,7 @@ Deno.serve(async (req) => {
     notes: reading.notes ?? null,
     needs_confirmation: conf < 0.85 || (reading.kwh_cumulative == null && reading.balance_tk == null),
     photo_sha256: photoHash,
-    model,
+    model: used,
     photo_stored: false,
   });
 });
