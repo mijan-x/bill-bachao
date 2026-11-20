@@ -34,6 +34,10 @@
   .src { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:8px 0; background:#fff; } .src .tag { font-family:'Inter',sans-serif; font-size:.74rem; color:var(--muted); }
   .src .tag b { color:var(--teal); } .pill { display:inline-block; border-radius:6px; padding:0 6px; margin-left:4px; font-size:.72rem; background:var(--bg); }
   textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; font:inherit; resize:vertical; }
+  .drop { border:2px dashed var(--line); border-radius:12px; padding:18px; text-align:center; background:var(--bg); cursor:pointer; }
+  .drop img { max-width:100%; max-height:260px; border-radius:8px; margin-top:10px; display:none; }
+  .conf { height:10px; border-radius:999px; background:var(--line); overflow:hidden; margin:6px 0 2px; } .conf i { display:block; height:100%; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; } .row button { flex:1; min-width:140px; }
   .why { font-size:.85rem; color:var(--muted); background:var(--bg); border-radius:8px; padding:8px 10px; margin-top:8px; }
   svg text { font-family:'Inter',sans-serif; font-size:11px; fill:var(--muted); }
   footer { text-align:center; color:var(--muted); font-size:.82rem; padding:20px 12px 40px; }
@@ -47,6 +51,7 @@
 </header>
 <nav id="tabs">
   <button data-t="dash" class="on">ড্যাশবোর্ড · Dashboard</button>
+  <button data-t="meter">মিটার পড়ুন · Read my meter</button>
   <button data-t="slab">স্ল্যাব গার্ড · Slab Guard</button>
   <button data-t="twin">হোম টুইন · Home twin</button>
   <button data-t="tariff">বিল হিসাব · Tariff</button>
@@ -68,6 +73,21 @@
     <p class="muted">Each dot is one day: daily kWh against mean temperature. The line is this home's twin: kWh = b + c × max(0, T − 24°C).</p>
     <div id="chart"></div>
     <div class="why" id="twinWhy"></div>
+  </div>
+</section>
+
+<section id="meter">
+  <div class="card">
+    <h2>Read my meter · মিটার পড়ুন <span class="sim" style="background:#dcfce7;color:#15803d">Live</span></h2>
+    <p class="muted">Take or upload a photo of your electricity meter's display. Gemini vision reads the digits into strict JSON; if a digit is not clear it returns nothing rather than a guess, and low-confidence readings ask you to check.</p>
+    <label class="drop" for="mtFile" id="mtDrop">
+      <b>📷 Tap to take a photo or choose an image</b><br><span class="muted">JPG or PNG · the display filling most of the photo · straight on, no glare</span>
+      <img id="mtPrev" alt="Your meter photo">
+    </label>
+    <input id="mtFile" type="file" accept="image/*" capture="environment" style="display:none">
+    <button class="main" id="mtBtn" disabled>Read the meter · মিটার পড়ুন</button>
+    <div id="mtOut" aria-live="polite"></div>
+    <div class="why">Privacy: photograph only the meter display — not your bill, name or account number. The photo goes to Google's Gemini model to read the digits and is <b>not stored</b> by Bill Bachao; we keep only a usage count for daily limits (20 photos per person per day).</div>
   </div>
 </section>
 
@@ -153,7 +173,7 @@
       <tr><td>Tariff calculator (BERC June 2026)</td><td>Real, unit-tested (same tests in Python and JS)</td></tr>
       <tr><td>Home twin maths and Slab Guard</td><td>Real, unit-tested</td></tr>
       <tr><td>Heat-safety rules</td><td>Real, unit-tested</td></tr>
-      <tr><td>Meter-photo OCR (Gemini vision API)</td><td>Built in the API (repo); not yet tested on real meter photos; not in this static demo</td></tr>
+      <tr><td>Meter-photo reading (Gemini vision)</td><td>Live in the Read my meter tab (Supabase Edge Function, photo not stored, daily limits); accuracy on real photos is being measured</td></tr>
       <tr><td>Bill redaction on local Ollama</td><td>Written in the repo; not yet run on the team laptop</td></tr>
       <tr><td>MCP server (bill-bachao-mcp)</td><td>Built and tested; stdio + Streamable HTTP</td></tr>
       <tr><td>Demo household "Rina", neighbourhood MW</td><td><span class="sim">Simulated</span></td></tr>
@@ -281,6 +301,63 @@ $('pkBtn').onclick = () => {
 };
 $('pkBtn').click();
 $('sgBtn').click();
+/* ---------- Read my meter (live: Supabase Edge Function ocr-meter -> Gemini vision) ---------- */
+(function meter() {
+  const URL_ = 'https://vkakhpqfhugaponhgubg.supabase.co/functions/v1/ocr-meter';
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let blob = null;
+  // Shrink big phone photos to <= 1600 px JPEG before upload (faster, fewer tokens, works for most phone formats).
+  async function prepare(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      $('mtPrev').src = c.toDataURL('image/jpeg', 0.7); $('mtPrev').style.display = 'block';
+      return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.88));
+    } finally { URL.revokeObjectURL(url); }
+  }
+  $('mtFile').onchange = async () => {
+    const f = $('mtFile').files[0]; if (!f) return;
+    $('mtOut').innerHTML = ''; $('mtBtn').disabled = true;
+    try { blob = await prepare(f); $('mtBtn').disabled = false; }
+    catch { blob = null; $('mtOut').innerHTML = '<div class="alert warn">This browser could not open that image. Please use a JPG or PNG (on iPhone: take a screenshot of the photo, or set Camera → Formats → Most Compatible).</div>'; }
+  };
+  $('mtBtn').onclick = async () => {
+    if (!blob) return;
+    $('mtBtn').disabled = true; $('mtOut').innerHTML = '<p class="muted">Reading the digits… · পড়ছি…</p>';
+    try {
+      const fd = new FormData(); fd.append('photo', blob, 'meter.jpg');
+      const r = await fetch(URL_, { method: 'POST', body: fd });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+      const pct = Math.round(j.confidence * 100), col = pct >= 85 ? '#16a34a' : pct >= 60 ? '#f59e0b' : '#dc2626';
+      const vals = [];
+      if (j.kwh_cumulative != null) vals.push(`<div class="stat"><b>${esc(j.kwh_cumulative)} kWh</b><span>total meter reading</span></div>`);
+      if (j.balance_tk != null) vals.push(`<div class="stat"><b>৳${esc(j.balance_tk)}</b><span>prepaid balance left</span></div>`);
+      let html = vals.length ? `<div class="grid" style="margin-top:12px">${vals.join('')}</div>`
+                             : '<div class="alert warn">No reading could be seen clearly in this photo, so no number is shown. Try again closer, straight on and without glare.</div>';
+      html += `<p class="muted" style="margin-top:10px">Confidence ${pct}%</p><div class="conf"><i style="width:${pct}%;background:${col}"></i></div>`;
+      if (j.notes) html += `<p class="muted">What the model saw: ${esc(j.notes)}</p>`;
+      if (vals.length) {
+        html += j.needs_confirmation
+          ? `<div class="alert warn"><b>Please check:</b> does this match the digits on your meter? Low-confidence readings are never used without your OK.</div>`
+          : `<div class="alert good">High confidence. In the full app this reading updates your home twin and Slab Guard.</div>`;
+        html += `<div class="row"><button class="main" id="mtYes">Yes, it matches · মিলেছে</button><button class="main" id="mtNo" style="background:#64748b">No, it's wrong · মেলেনি</button></div><div id="mtFix"></div>`;
+      }
+      html += `<p class="muted">Model: ${esc(j.model)} · photo stored: no</p>`;
+      $('mtOut').innerHTML = html;
+      if (vals.length) {
+        $('mtYes').onclick = () => $('mtFix').innerHTML = '<div class="alert good">Thanks — confirmed. (This demo does not save readings.)</div>';
+        $('mtNo').onclick = () => $('mtFix').innerHTML = `<label>Type the correct reading</label><input type="number" step="0.01" id="mtManual" placeholder="e.g. 4521.3"><p class="muted">Thanks — wrong readings like this are what we use to measure and improve accuracy. (Not saved in this demo.)</p>`;
+      }
+    } catch (err) {
+      $('mtOut').innerHTML = `<div class="alert warn">${esc(err.message)}</div>`;
+    } finally { $('mtBtn').disabled = false; }
+  };
+})();
+
 /* ---------- Coach (live: Supabase Edge Function, hybrid RAG + knowledge graph) ---------- */
 (function coach() {
   const URL_ = 'https://vkakhpqfhugaponhgubg.supabase.co/functions/v1/coach';

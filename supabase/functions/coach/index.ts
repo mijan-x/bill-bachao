@@ -42,7 +42,16 @@ Deno.serve(async (req) => {
 
   let answer: string | null = null;
   let model: string | null = null;
-  const key = Deno.env.get("GEMINI_API_KEY");
+  let key = Deno.env.get("GEMINI_API_KEY");
+  let limited: string | null = null;
+  if (key && sources.length) {
+    // Daily caps on generated answers (retrieval itself stays unlimited and free).
+    const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+    const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("bill-bachao:" + ip));
+    const ipHash = Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const { data: quota } = await db.rpc("take_api_quota", { p_feature: "coach_answer", p_ip_hash: ipHash, p_ip_cap: 40, p_global_cap: 600 });
+    if (quota !== "ok") { limited = "Daily limit for written answers reached; showing sources only."; key = undefined; }
+  }
   if (key && sources.length) {
     model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
     const ctx = sources.map((s) => `[${s.n}] ${s.doc} — ${s.section}\n${s.text}`).join("\n\n");
@@ -68,6 +77,7 @@ Deno.serve(async (req) => {
     answer,
     model,
     mode: answer ? "rag+llm" : "retrieval-only",
+    note: limited,
     related_topics: related ?? [],
     sources,
   }, { headers: cors });
