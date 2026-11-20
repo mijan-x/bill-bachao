@@ -15,7 +15,7 @@ ClimateSphere AI → Energy Brain · International AI Builders Congress 2026 · 
 | `mcp/server.py` | `bill-bachao-mcp` (FastMCP): read-only tools over stdio or Streamable HTTP (`/mcp` on port 8001) | runs and tested |
 | `db/schema.sql` | Supabase tables, row-level security, tariff seed | **deployed** (Supabase, Singapore) |
 | `knowledge/`, `rag/` | Coach knowledge base (5 docs, 28 chunks), context lines, knowledge graph, retrieval test | **deployed**, 15/15 top-3 |
-| `supabase/` | Edge Functions `embed-chunks` + `coach` (hybrid RAG + graph) and the RAG migration | **deployed** |
+| `supabase/` | Edge Functions `embed-chunks`, `coach` (hybrid RAG + graph) and `ocr-meter` (meter photo → JSON), RAG and usage-limit migrations | **deployed** |
 | `scripts/seed_demo.py` | 60 days of SIMULATED readings for the public demo | runs |
 | `web/` | Public prototype: dashboard, Slab Guard, home twin, tariff, Peak Hour Hero preview, live Ask the coach | live on GitHub Pages |
 | `docs/` | Architecture, master prompt | |
@@ -35,7 +35,7 @@ cd api && uvicorn main:app --reload --port 8000         # open http://localhost:
 | Part | Status |
 |---|---|
 | Tariff calculator | Real, unit-tested |
-| Meter OCR (Gemini vision) | Built; not yet tested on real meter photos |
+| Meter OCR (Gemini vision) | Live in the demo's Read my meter tab (Supabase Edge Function `ocr-meter`, photo not stored, daily limits); accuracy on real photos being measured |
 | Coach retrieval (hybrid RAG + knowledge graph) | Real, live in Supabase; answer generation waits for a Gemini key |
 | Bill redaction (local Ollama) | Written; not yet run |
 | Demo household "Rina" | Simulated |

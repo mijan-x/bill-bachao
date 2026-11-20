@@ -18,7 +18,7 @@ flowchart TD
 |---|---|
 | Tariff calculator (BERC June 2026) | Built, tested in Python and JS (`api/tariff.py`, `web/logic.js`) |
 | Home twin + Slab Guard maths | Built, tested (`api/twin.py`) |
-| Meter OCR endpoint | Built (`api/main.py`, Gemini vision, strict JSON); not yet tested on real meter photos |
+| Meter OCR | Live: Supabase Edge Function `ocr-meter` used by the demo's Read my meter tab (photo not stored, daily caps); same prompt as `api/main.py`. Accuracy on real photos being measured |
 | Local bill redactor | Written (`local/redactor.py`, Tesseract + Ollama qwen2.5); not yet run |
 | MCP server | Built and tested (`mcp/server.py`, stdio + Streamable HTTP at `/mcp`; `tests/test_mcp.py`) |
 | Database schema + RLS | Built (`db/schema.sql`) |
