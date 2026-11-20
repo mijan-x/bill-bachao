@@ -259,7 +259,9 @@ $('tfBtn').onclick = () => {
   const r = BB.tariff(+$('tfUnits').value, +$('tfKw').value, +$('tfDr').value);
   $('tfOut').innerHTML = `<table style="margin-top:12px"><tr><th>Block (units)</th><th>Units</th><th>Rate</th><th>Tk</th></tr>${r.blocks.map(b => `<tr><td>${b.from}–${b.to === Infinity ? '…' : f1(b.to)}</td><td>${f1(b.units)}</td><td>৳${b.rate}</td><td>${b.tk.toLocaleString('en-IN')}</td></tr>`).join('')}
    <tr><td colspan="3">Energy charge</td><td>${r.energy.toLocaleString('en-IN')}</td></tr><tr><td colspan="3">Demand charge</td><td>${r.demand.toLocaleString('en-IN')}</td></tr><tr><td colspan="3">VAT 5%</td><td>${r.vat.toLocaleString('en-IN')}</td></tr><tr><th colspan="3">Total</th><th>${r.total.toLocaleString('en-IN')}</th></tr></table>
-   <div class="why">Next unit costs ৳${BB.marginalRate(r.units)}. ${r.toNext !== null ? f1(r.toNext) + ' units until the next slab.' : 'You are in the top slab.'}</div>`;
+   <div class="why">${r.units <= 50
+      ? `Lifeline rate: every unit is ৳4.63 while the month stays at or below 50 units. Going above 50 moves <b>all</b> units to the normal slabs, so the 51st unit alone adds about ৳${f1(BB.tariff(51).energy - BB.tariff(50).energy)} before VAT.${r.units < 50 ? ' You have ' + f1(50 - r.units) + ' units left at the lifeline rate.' : ''}`
+      : `Next unit costs ৳${BB.marginalRate(r.units)}. ${r.toNext !== null ? (r.toNext === 0 ? 'You are exactly at a slab edge.' : f1(r.toNext) + ' units until the next slab.') : 'You are in the top slab.'}`}</div>`;
 };
 $('tfBtn').click();
 
