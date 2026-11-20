@@ -10,7 +10,7 @@ ClimateSphere AI → Energy Brain · International AI Builders Congress 2026 · 
 |---|---|---|
 | `api/tariff.py` | BERC June 2026 residential tariff (progressive blocks, lifeline, demand charge, 5% VAT) | tested |
 | `api/twin.py` | Nameplate estimate, cooling regression (kWh = b + c·CDD), Slab Guard forecast, AC saving range | tested |
-| `api/main.py` | FastAPI: `/health`, `/tariff`, `/twin/nameplate`, `/ocr/meter` (Gemini vision → strict JSON) | runs and tested; `/ocr/meter` needs `GEMINI_API_KEY` and is not yet tested on real meter photos |
+| `api/main.py` | FastAPI: `/health`, `/tariff`, `/twin/nameplate`, `/ocr/meter` (Gemini vision → strict JSON) | runs and tested; `/ocr/meter` needs `GEMINI_API_KEY` (the live demo uses the same prompt in the `ocr-meter` Edge Function) |
 | `local/redactor.py` | For the team laptop: Tesseract + regex + Ollama qwen2.5 removes personal data from bill photos | written, not yet run (needs Tesseract + Ollama) |
 | `mcp/server.py` | `bill-bachao-mcp` (FastMCP): read-only tools over stdio or Streamable HTTP (`/mcp` on port 8001) | runs and tested |
 | `db/schema.sql` | Supabase tables, row-level security, tariff seed | **deployed** (Supabase, Singapore) |
@@ -35,7 +35,7 @@ cd api && uvicorn main:app --reload --port 8000         # open http://localhost:
 | Part | Status |
 |---|---|
 | Tariff calculator | Real, unit-tested |
-| Meter OCR (Gemini vision) | Live in the demo's Read my meter tab (Supabase Edge Function `ocr-meter`, photo not stored, daily limits); accuracy on real photos being measured |
+| Meter OCR (Gemini vision) | Live in the demo's Read my meter tab (Supabase Edge Function `ocr-meter`, `gemini-3.5-flash-lite`, photo not stored, daily limits). Tested on 2 real meter photos from a team member's home: the whole-kWh reading matched both times and the decimal digit matched on the retaken second photo; it also picked the correct present reading from a DPDC bill. Small test — more meters, lighting and angles before the final. |
 | Coach retrieval (hybrid RAG + knowledge graph) | Real, live in Supabase; answer generation waits for a Gemini key |
 | Bill redaction (local Ollama) | Written; not yet run |
 | Demo household "Rina" | Simulated |
