@@ -1,3 +1,4 @@
+-- Loads the coach knowledge base into a FRESH project (it clears the RAG tables first; embeddings must be rebuilt after).
 begin;
 delete from chunk_entities; delete from kg_edges; delete from kg_nodes; delete from rag_chunks;
 insert into rag_chunks(chunk_key,doc,doc_title,section,source_url,context_prefix,chunk_text) values('app-faq-0','app-faq.md','Bill Bachao app FAQ','How do I read my prepaid meter?','https://github.com/mijan-x/bill-bachao/blob/main/knowledge/app-faq.md','From the Bill Bachao app FAQ: practical guidance on photographing a prepaid electricity meter so the app can read the balance or total kWh.','Most prepaid meters cycle through several screens. Photograph the screen that shows the remaining balance in taka or the total kWh used. Hold the phone straight, avoid glare, and make sure all digits are sharp. Bill Bachao reads the digits; if it is not sure, it asks you to confirm.');
@@ -40,8 +41,8 @@ insert into kg_nodes values('vat','Charge','VAT and demand charge',array['vat','
 insert into kg_nodes values('bill','Outcome','Monthly bill',array['bill','bills','tariff','taka','tk','বিল','দাম']::text[]);
 insert into kg_nodes values('peak','Grid','Evening peak',array['peak','9 pm','evening','megawatt','mw','grid']::text[]);
 insert into kg_nodes values('loadshed','Grid','Load-shedding',array['load-shedding','loadshedding','power cut','লোডশেডিং']::text[]);
-insert into kg_nodes values('heat','Risk','Dangerous heat',array['heat','heat index','heatwave','hot','heat illness']::text[]);
-insert into kg_nodes values('vulnerable','Risk','Vulnerable household member',array['elderly','infant','pregnant','ill','vulnerable']::text[]);
+insert into kg_nodes values('heat','Risk','Dangerous heat',array['heat','heat index','heatwave','hot','heat illness','hot night','very hot','গরম']::text[]);
+insert into kg_nodes values('vulnerable','Risk','Vulnerable household member',array['elderly','infant','pregnant','ill','vulnerable','old','older','grandmother','grandfather','grandma','grandpa','baby','child','children','sick','patient','নানি','দাদি','বৃদ্ধ','শিশু','অসুস্থ']::text[]);
 insert into kg_nodes values('slabguard','Feature','Slab Guard',array['slab guard','forecast','month-end']::text[]);
 insert into kg_nodes values('twin','Feature','Home twin',array['home twin','twin','nameplate','base load']::text[]);
 insert into kg_nodes values('hero','Feature','Peak Hour Hero',array['peak hour hero','challenge','challenges','demand response']::text[]);

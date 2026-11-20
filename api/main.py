@@ -1,6 +1,6 @@
 """Bill Bachao API (preliminary). Run: uvicorn main:app --reload --port 8000"""
 import hashlib, json, os
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from google import genai
@@ -10,7 +10,18 @@ from tariff import tariff_calc, marginal_rate
 from twin import nameplate_kwh_per_day
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")  # use the current Flash model name from AI Studio
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+_client = None
+
+
+def gemini():
+    """Create the Gemini client on first use, so /health, /tariff and /twin work without a key."""
+    global _client
+    if _client is None:
+        key = os.getenv("GEMINI_API_KEY")
+        if not key:
+            raise HTTPException(503, "Meter OCR is not configured: set GEMINI_API_KEY")
+        _client = genai.Client(api_key=key)
+    return _client
 
 app = FastAPI(title="Bill Bachao API", version="0.1.0")
 app.add_middleware(
@@ -36,11 +47,11 @@ OCR_PROMPT = (
 
 @app.get("/health")
 def health():
-    return {"ok": True, "model": MODEL}
+    return {"ok": True, "model": MODEL, "ocr_configured": bool(os.getenv("GEMINI_API_KEY"))}
 
 
 @app.get("/tariff")
-def tariff(units: float, sanctioned_kw: float = 0, demand_rate: float = 0):
+def tariff(units: float = Query(..., ge=0), sanctioned_kw: float = Query(0, ge=0), demand_rate: float = Query(0, ge=0)):
     b = tariff_calc(units, sanctioned_kw, demand_rate)
     return {**b.__dict__, "next_unit_rate": marginal_rate(units)}
 
@@ -53,14 +64,19 @@ async def ocr_meter(photo: UploadFile = File(...)):
     if len(data) > 8 * 1024 * 1024:
         raise HTTPException(413, "Photo too large (max 8 MB)")
     photo_hash = hashlib.sha256(data).hexdigest()  # store this to reject duplicates
-    resp = client.models.generate_content(
-        model=MODEL,
-        contents=[types.Part.from_bytes(data=data, mime_type=photo.content_type), OCR_PROMPT],
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json", response_schema=MeterReading, temperature=0
-        ),
-    )
-    reading = MeterReading(**json.loads(resp.text))
+    try:
+        resp = gemini().models.generate_content(
+            model=MODEL,
+            contents=[types.Part.from_bytes(data=data, mime_type=photo.content_type), OCR_PROMPT],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json", response_schema=MeterReading, temperature=0
+            ),
+        )
+        reading = MeterReading(**json.loads(resp.text))
+    except HTTPException:
+        raise
+    except Exception as e:  # model or parsing failure: never return a guessed number
+        raise HTTPException(502, f"Could not read the meter photo ({type(e).__name__}); please retake it")
     # TODO: insert into meter_readings with photo_hash; if confidence < 0.85 ask the user to confirm
     return reading
 

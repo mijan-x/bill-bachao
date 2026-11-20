@@ -16,11 +16,11 @@ flowchart TD
 
 | Component | Status (preliminary) |
 |---|---|
-| Tariff calculator (BERC June 2026) | Built, tested (`api/tariff.py`, `web/logic.js`) |
+| Tariff calculator (BERC June 2026) | Built, tested in Python and JS (`api/tariff.py`, `web/logic.js`) |
 | Home twin + Slab Guard maths | Built, tested (`api/twin.py`) |
-| Meter OCR endpoint | Built (`api/main.py`, Gemini vision, strict JSON) |
-| Local bill redactor | Built (`local/redactor.py`, Tesseract + Ollama qwen2.5) |
-| MCP server | Built (`mcp/server.py`, stdio + Streamable HTTP at `/mcp`) |
+| Meter OCR endpoint | Built (`api/main.py`, Gemini vision, strict JSON); not yet tested on real meter photos |
+| Local bill redactor | Written (`local/redactor.py`, Tesseract + Ollama qwen2.5); not yet run |
+| MCP server | Built and tested (`mcp/server.py`, stdio + Streamable HTTP at `/mcp`; `tests/test_mcp.py`) |
 | Database schema + RLS | Built (`db/schema.sql`) |
 | Public demo | Built (`web/`, simulated household) |
 | Coach retrieval: contextual chunks, hybrid search (vector + full-text, RRF), knowledge graph | Built, live in Supabase (`rag/`, `supabase/`); 15/15 top-3 and 15/15 first on our test set |

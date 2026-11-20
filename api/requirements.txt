@@ -4,3 +4,4 @@ python-multipart
 pydantic>=2
 google-genai
 supabase
+httpx  # for FastAPI TestClient (tests)
